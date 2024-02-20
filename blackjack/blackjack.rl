@@ -19,19 +19,6 @@ ent Deck:
             self.cards.append(i)
             i = i + 1
 
-act draw(ctx Deck deck, ctx Vector<Int> hand) -> Draw:
-    # BUG? deck.cards.size does not work in the condition.
-    act draw(Int index) {index >= 0, index < deck.size()}
-    frm card = deck.cards.get(index)
-    deck.cards.erase(index)
-    hand.append(card)
-
-act deal(ctx Deck deck, ctx Vector<Int> hand) -> Deal:
-    frm i = 0
-    while i < 2:
-        subaction* (deck, hand) d = draw(deck, hand)
-        i = i + 1
-
 fun calculate_points(Vector<Int> hand) -> Int:
     let total = 0
     let num_ones = 0
@@ -61,9 +48,18 @@ act play() -> Blackjack:
     frm deck : Deck
     frm player_hand : Vector<Int>
     frm dealer_hand : Vector<Int>
-
-    subaction* (deck, player_hand) deal_player = deal(deck, player_hand)
-    subaction* (deck, player_hand) deal_dealer = deal(deck, dealer_hand)
+    frm i = 0
+    while i < 2:
+        act deal_player(Int index) {index >= 0, index < deck.cards.size()}
+        let card = deck.cards.get(index)
+        deck.cards.erase(index)
+        player_hand.append(card)
+        
+        act deal_dealer(Int index) {index >= 0, index < deck.cards.size()}
+        let card = deck.cards.get(index)
+        deck.cards.erase(index)
+        dealer_hand.append(card)
+        i = i + 1
 
     frm player_passed = false
     frm player_bust = false
@@ -71,7 +67,10 @@ act play() -> Blackjack:
     while !player_bust and !player_passed:
         actions:
             act hit()
-            subaction* (deck, player_hand) player_draws = draw(deck, player_hand)
+            act draw_player(Int index) {index >= 0, index < deck.cards.size()}
+            frm card = deck.cards.get(index)
+            deck.cards.erase(index)
+            player_hand.append(card)
             if calculate_points(player_hand) > 21:
                 player_bust = true
 
@@ -79,20 +78,21 @@ act play() -> Blackjack:
             player_passed = true
     
     while calculate_points(dealer_hand) <= 16:
-        subaction* (deck, dealer_hand) dealer_draws = draw(deck, dealer_hand)
+        act draw_dealer(Int index) {index >= 0, index < deck.cards.size()}
+        frm card = deck.cards.get(index)
+        deck.cards.erase(index)
+        dealer_hand.append(card)
 
 fun main() -> Int:
-# BUG? This seems to get stuck in a loop.  
    let game = play()
-   game.draw(4)
-   game.draw(4)
-   game.draw(4)
-   game.draw(4)
+   game.deal_player(4)
+
    if(game.player_hand.size() != 2):
        return 1
    if(game.dealer_hand.size() != 2):
        return 1
    game.hit()
+   game.draw_player(2)
 
    if(!game.is_done()):
        return 1
