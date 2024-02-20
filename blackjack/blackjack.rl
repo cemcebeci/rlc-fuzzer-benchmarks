@@ -1,5 +1,5 @@
-#import fuzzer.cpp_functions
-#import fuzzer.utils
+import fuzzer.cpp_functions
+import fuzzer.utils
 import collections.vector
 
 fun crash() {1 == 0}:
@@ -66,7 +66,6 @@ act play() -> Blackjack:
 
     while !player_bust and !player_passed:
         actions:
-            act hit()
             act draw_player(Int index) {index >= 0, index < deck.cards.size()}
             frm card = deck.cards.get(index)
             deck.cards.erase(index)
@@ -85,15 +84,18 @@ act play() -> Blackjack:
 
 fun main() -> Int:
    let game = play()
-   game.deal_player(4)
+   game.deal_player(47)
+   game.deal_dealer(15)
+   game.deal_player(45)
+   game.deal_dealer(27)
 
    if(game.player_hand.size() != 2):
        return 1
    if(game.dealer_hand.size() != 2):
        return 1
    game.hit()
-   game.draw_player(2)
-
+   game.draw_player(43)
+   game.draw_dealer(42)
    if(!game.is_done()):
        return 1
    return 0
