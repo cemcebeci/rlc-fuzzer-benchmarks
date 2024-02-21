@@ -1,5 +1,5 @@
-SHELL=/bin/bash
 RLC=/home/ccebeci/rlc/rlc-infrastructure/rlc-debug/install/bin/rlc
+BUG_DEPTH?=3
 
 all: build/fuzzer_tic_tac_toe
 
