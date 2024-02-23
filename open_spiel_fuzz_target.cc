@@ -85,48 +85,10 @@ extern "C" int LLVMFuzzerTestOneInput(const char *Data, size_t Size) {
 
   try {
     while (!state->IsTerminal()) {
-      out << "player " << state->CurrentPlayer() << std::endl;
-
-      if (state->IsChanceNode()) {
-        // Chance node; pick any.
-        open_spiel::Action action = pickAction(state->LegalChanceOutcomes(), Data,
+      // Assuming no simultaneous nodes.
+      open_spiel::Action action = pickAction(state->LegalActions(), Data,
                                               Size, byte_offset, bit_offset);
-        out << "sampled outcome: "
-                  << state->ActionToString(open_spiel::kChancePlayerId, action)
-                  << std::endl;
-        state->ApplyAction(action);
-      } else if (state->IsSimultaneousNode()) {
-        // open_spiel::Players choose simultaneously?
-        std::vector<open_spiel::Action> joint_action;
-        std::vector<float> infostate(game->InformationStateTensorSize());
-
-        // Sample an action for each player
-        for (auto player = open_spiel::Player{0}; player < game->NumPlayers();
-            ++player) {
-          std::vector<open_spiel::Action> actions = state->LegalActions(player);
-          PrintLegalActions(*state, player, actions);
-
-          open_spiel::Action action =
-              pickAction(actions, Data, Size, byte_offset, bit_offset);
-          joint_action.push_back(action);
-          out << "player " << player << " chose "
-                    << state->ActionToString(player, action) << std::endl;
-        }
-
-        state->ApplyActions(joint_action);
-      } else {
-        // Decision node, sample one uniformly.
-        auto player = state->CurrentPlayer();
-        std::vector<open_spiel::Action> actions = state->LegalActions();
-        PrintLegalActions(*state, player, actions);
-
-        open_spiel::Action action =
-            pickAction(actions, Data, Size, byte_offset, bit_offset);
-        out << "chose action: " << state->ActionToString(player, action)
-                  << std::endl;
-        state->ApplyAction(action);
-      }
-
+      state->ApplyAction(action);
       out << "State: " << std::endl << state->ToString() << std::endl;
     }
   } catch (OutOfFuzzInputException e) {
