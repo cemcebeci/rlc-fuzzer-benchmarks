@@ -3,9 +3,9 @@ from statistics import mean
 import time
 import matplotlib.pyplot as plt
 
-REPEAT_COUNT = 3
-fuzzers = ['fuzzer_blackjack', 'fuzzer_blackjack_no_fsm']#, 'fuzzer_blackjack_no_precons', 'fuzzer_blackjack_no_improvements']
-bug_depths = range(1, 30, 2)
+REPEAT_COUNT = 2
+fuzzers = ['rlc_blackjack', 'rlc_blackjack_no_fsm', 'open_spiel_whitebox_blackjack']
+bug_depths = range(1, 30, 5)
 
 time_measurements = {fuzzer: {} for fuzzer in fuzzers}
 
@@ -31,8 +31,9 @@ for bug_depth in bug_depths:
     print(average_measurements)
 
     fig, ax = plt.subplots() 
-    ax.plot(processed_depths, average_measurements['fuzzer_blackjack'], 'g-', label='full')
-    ax.plot(processed_depths, average_measurements['fuzzer_blackjack_no_fsm'], 'b-', label='no-fsm')
+    ax.plot(processed_depths, average_measurements['rlc_blackjack'], 'g-', label='rlc-full')
+    ax.plot(processed_depths, average_measurements['rlc_blackjack_no_fsm'], 'b-', label='rlc-no-fsm')
+    ax.plot(processed_depths, average_measurements['open_spiel_whitebox_blackjack'], 'r-', label='os-whitebox')
 
     ax.legend()
     plt.savefig(f'plot_{j}.png')

@@ -22,7 +22,7 @@ build/blackjack.rl: blackjack.rl.in
 build/open_spiel_whitebox_blackjack: ../open_spiel_fuzz_target.cc buggy_blackjack.cc
 	clang++ -I"$(OPEN_SPIEL_PATH)" -I"$(OPEN_SPIEL_PATH)/open_spiel/abseil-cpp" -std=c++17 \
 			-L"$(OPEN_SPIEL_PATH)/build" -lopen_spiel -fsanitize=fuzzer,address \
-			-o build/open_spiel_whitebox_blackjack ../open_spiel_fuzz_target.cc -DGAME=buggy_blackjack buggy_blackjack.cc
+			-o build/open_spiel_whitebox_blackjack ../open_spiel_fuzz_target.cc -DGAME=buggy_blackjack buggy_blackjack.cc -D__TARGET_SCORE_MULTIPLIER__=$(BUG_DEPTH)
 
 clean:
 	rm -f build/*

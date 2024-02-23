@@ -27,7 +27,7 @@
 namespace open_spiel {
 namespace buggy_blackjack {
 
-constexpr int kNumSuits = 4;
+constexpr int kNumSuits = 4 * __TARGET_SCORE_MULTIPLIER__;
 constexpr int kCardsPerSuit = 13;
 constexpr int kDeckSize = kCardsPerSuit * kNumSuits;
 

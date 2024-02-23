@@ -55,7 +55,7 @@ static open_spiel::Action pickAction(std::vector<open_spiel::Action> actions,
   int num_bits = ceil(log2(num_actions));
   auto picked_index =
       std::abs(consume_bits(Data, Size, num_bits, byte_offset, bit_offset) % num_actions);
-  std::cout << "picked: " << picked_index << "\n";
+  out << "picked: " << picked_index << "\n";
   return actions.at(picked_index);
 }
 

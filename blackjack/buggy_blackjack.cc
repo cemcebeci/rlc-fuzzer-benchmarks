@@ -34,7 +34,7 @@ constexpr int kPlayerId = 0;
 constexpr int kAceValue = 1;
 // The max score to approach for any player, i.e. as close to this as possible
 // without exceeding it.
-constexpr int kApproachScore = 21;
+constexpr int kApproachScore = 21 * __TARGET_SCORE_MULTIPLIER__;
 constexpr int kInitialCardsPerPlayer = 2;
 
 // Facts about the game
@@ -202,6 +202,12 @@ int BuggyBlackjackState::GetBestPlayerTotal(int player) const {
       total = std::max(total, soft_total);
     }
   }
+  /* -------------------------------------------------------------------------- */
+  /*                       THIS IS THE BUG I'VE INTRODUCED                      */
+  /* -------------------------------------------------------------------------- */
+  if(total == kApproachScore)
+    throw std::exception();
+  /* -------------------------------------------------------------------------- */
   return total;
 }
 
@@ -270,7 +276,7 @@ void BuggyBlackjackState::MaybeApplyDealerAction() {
 
   // Otherwise, hits 16 or less, stands on 17 or more.
   if (cur_player_ == DealerId()) {
-    if (GetBestPlayerTotal(DealerId()) <= 16) {
+    if (GetBestPlayerTotal(DealerId()) <= kApproachScore - 5) {
       cur_player_ = kChancePlayerId;
     } else {
       EndPlayerTurn(cur_player_);
