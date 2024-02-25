@@ -23,6 +23,8 @@
 #include "open_spiel/spiel.h"
 #include "open_spiel/spiel_globals.h"
 
+#include "../expected_error.h"
+
 namespace open_spiel {
 namespace buggy_blackjack {
 
@@ -161,7 +163,7 @@ int BuggyBlackjackState::CardValue(int card) const {
 void BuggyBlackjackState::DealCardToPlayer(int player, int card) {
   // Remove card from deck.
   auto new_end = std::remove(deck_.begin(), deck_.end(), card);
-  if (new_end == deck_.end()) SpielFatalError("Card not present in deck");
+  if (new_end == deck_.end()) ExpectedError();
   deck_.erase(new_end, deck_.end());
 
   cards_[player].push_back(card);

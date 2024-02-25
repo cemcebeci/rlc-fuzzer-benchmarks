@@ -13,7 +13,7 @@ ent Deck:
         let i = 1
         while i <= 13 :
             let j = 0
-            while j <= 4 * __TARGET_SCORE_MULTIPLIER__:
+            while j < 4 * __TARGET_SCORE_MULTIPLIER__:
                 # once for each suit.
                 self.cards.append(i)
                 j = j + 1
