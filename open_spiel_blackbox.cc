@@ -5,6 +5,7 @@
 #include "open_spiel/spiel.h"
 #include "open_spiel/spiel_utils.h"
 #include "open_spiel/spiel_globals.h"
+#include "expected_error.h"
 
 #ifdef DEBUG
 #define out std::cout
@@ -75,6 +76,8 @@ extern "C" int LLVMFuzzerTestOneInput(const char *Data, size_t Size) {
       out << "State: " << std::endl << state->ToString() << std::endl;
     }
   } catch (OutOfFuzzInputException e) {
+    return 0;
+  } catch (ExpectedError e) {
     return 0;
   }
 

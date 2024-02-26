@@ -77,7 +77,6 @@ ent Board:
 			return true
 
 		if self.inverse_diagonal_player(player_id):
-			crash()
 			return true
 
 		return false
@@ -104,6 +103,7 @@ act play() -> TicTacToe:
 		board.set(x, y, board.current_player())
 
 		if board.complete_line_player(board.current_player()):
+			crash()
 			return
 
 		board.next_turn()
