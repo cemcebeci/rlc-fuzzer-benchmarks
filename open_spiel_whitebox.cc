@@ -23,30 +23,28 @@ void PrintLegalActions(const open_spiel::State &state,
 
 class OutOfFuzzInputException : public std::exception {};
 
-static int64_t consume_bits(const char *Data, size_t Size, int num_bits, int &byte_offset,
-                            int &bit_offset) {
-  int64_t result = 0;
-  int remaining_bits = num_bits;
+static int64_t consume_bits(const char *Data, size_t Size, int num_bits, int &byte_offset, int &bit_offset) {
+    int64_t result = 0;
+    int remaining_bits = num_bits;
 
-  while (true) {
-    if(byte_offset >= Size) {
-      throw OutOfFuzzInputException();
+    while (true) {
+        if(byte_offset >= Size) {
+          throw OutOfFuzzInputException();
+        }
+        int to_consume_from_current_byte = std::min(remaining_bits, 8 - bit_offset);
+        int shift_count = bit_offset;
+        int mask = ((1u << to_consume_from_current_byte) - 1) << shift_count;
+        int data = (*(Data + byte_offset) & mask) >> shift_count;
+        result = (result << to_consume_from_current_byte) | data;
+        if(remaining_bits > to_consume_from_current_byte) {
+            byte_offset ++;
+            remaining_bits -= to_consume_from_current_byte;
+            bit_offset = 0;
+        } else {
+            bit_offset = bit_offset + to_consume_from_current_byte % 8;
+            return result;
+        }
     }
-    int to_consume_from_current_byte = std::min(remaining_bits, 8 - bit_offset);
-    int shift_count = (8 - bit_offset - remaining_bits);
-    int mask = ((1u << to_consume_from_current_byte) - 1) << shift_count;
-    int data = (*(Data + byte_offset) & mask) >> shift_count;
-    result = (result << to_consume_from_current_byte) | data;
-
-    if (remaining_bits >= (8 - bit_offset)) {
-      byte_offset++;
-      remaining_bits -= (8 - bit_offset);
-      bit_offset = 0;
-    } else {
-      bit_offset = bit_offset + remaining_bits;
-      return result;
-    }
-  }
 }
 
 static open_spiel::Action pickAction(std::vector<open_spiel::Action> actions,
