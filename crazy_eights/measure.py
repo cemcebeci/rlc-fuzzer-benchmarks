@@ -3,9 +3,9 @@ from statistics import mean
 import time
 import matplotlib.pyplot as plt
 
-REPEAT_COUNT = 4
-fuzzers = ['rlc_tic_tac_toe', 'rlc_tic_tac_toe_no_fsm','open_spiel_whitebox_tic_tac_toe'] 
-bug_depths = range(1, 100, 5)
+REPEAT_COUNT = 2
+fuzzers = ['open_spiel_whitebox_crazy_eights']
+bug_depths = range(7, 26, 2)
 
 time_measurements = {fuzzer: {} for fuzzer in fuzzers}
 execution_count_measurements = {fuzzer: {} for fuzzer in fuzzers}
@@ -36,12 +36,12 @@ for bug_depth in bug_depths:
     average_count_measurements = {fuzzer:[mean(execution_count_measurements[fuzzer][bug_depth]) for bug_depth in processed_depths] for fuzzer in fuzzers}
 
     fig, ax = plt.subplots() 
-    ax.plot(processed_depths, average_time_measurements['rlc_tic_tac_toe'], 'g-', label='rlc-full')
-    ax.plot(processed_depths, average_time_measurements['rlc_tic_tac_toe_no_fsm'], 'b-', label='rlc-no-fsm')
+    #ax.plot(processed_depths, average_time_measurements['rlc_tic_tac_toe'], 'g-', label='rlc-full')
+    #ax.plot(processed_depths, average_time_measurements['rlc_tic_tac_toe_no_fsm'], 'b-', label='rlc-no-fsm')
     # ax.plot(processed_depths, average_time_measurements['rlc_tic_tac_toe_no_precons'], 'c-', label='rlc-no-precons')
     # ax.plot(processed_depths, average_time_measurements['rlc_tic_tac_toe_no_improvements'], 'y-', label='rlc-blackbox')
     # ax.plot(processed_depths, average_time_measurements['open_spiel_blackbox_tic_tac_toe'], 'r-', label='os-blackbox')
-    ax.plot(processed_depths, average_time_measurements['open_spiel_whitebox_tic_tac_toe'], 'm-', label='os-whitebox')
+    ax.plot(processed_depths, average_time_measurements['open_spiel_whitebox_crazy_eights'], 'm-', label='os-whitebox')
 
     plt.xlabel('Bug Depth')
     plt.ylabel('Average Fuzzing Time (s)')
@@ -56,12 +56,12 @@ for bug_depth in bug_depths:
             print("\t".join([str(measurement) for measurement in time_measurements[fuzzer][bug_depth]]))
 
     fig, ax = plt.subplots() 
-    ax.plot(processed_depths, average_count_measurements['rlc_tic_tac_toe'], 'g-', label='rlc-full')
-    ax.plot(processed_depths, average_count_measurements['rlc_tic_tac_toe_no_fsm'], 'b-', label='rlc-no-fsm')
+    # ax.plot(processed_depths, average_count_measurements['rlc_tic_tac_toe'], 'g-', label='rlc-full')
+    # ax.plot(processed_depths, average_count_measurements['rlc_tic_tac_toe_no_fsm'], 'b-', label='rlc-no-fsm')
     # ax.plot(processed_depths, average_count_measurements['rlc_tic_tac_toe_no_precons'], 'c-', label='rlc-no-precons')
     # ax.plot(processed_depths, average_count_measurements['rlc_tic_tac_toe_no_improvements'], 'y-', label='rlc-blackbox')
     # ax.plot(processed_depths, average_count_measurements['open_spiel_blackbox_tic_tac_toe'], 'r-', label='os-blackbox')
-    ax.plot(processed_depths, average_count_measurements['open_spiel_whitebox_tic_tac_toe'], 'm-', label='os-whitebox')
+    ax.plot(processed_depths, average_count_measurements['open_spiel_whitebox_crazy_eights'], 'm-', label='os-whitebox')
     plt.yscale("log")
     plt.xlabel('Bug Depth')
     plt.ylabel('Average Number of Executions')
