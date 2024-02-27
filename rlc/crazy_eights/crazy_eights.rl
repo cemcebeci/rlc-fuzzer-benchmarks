@@ -92,7 +92,10 @@ act play() -> CrazyEights:
     last_card = take_card_at_index(deck, top_card_index)
     revealed(last_card.suit, last_card.rank)
 
-    frm current_player = 0 # TODO pick this with an action.
+    frm current_player = 0
+    act pick_starting_player(Int starting_player) {starting_player >= 0, starting_player <= 1}
+    current_player = starting_player
+
     frm game_over = false
     while !game_over:
         frm cards_drawn_this_turn = 0
@@ -116,6 +119,8 @@ act play() -> CrazyEights:
                         short_circuited_access(p_one_hand, card_index_in_hand).rank == last_card.rank
                     }
                     last_card = take_card_at_index(p_one_hand, card_index_in_hand)
+                    if p_one_hand.size() == 0:
+                        game_over = true
                     p1_plays(last_card.suit, last_card.rank)
                     p1_done = true
                     if last_card.rank == 8:
@@ -144,6 +149,8 @@ act play() -> CrazyEights:
                         short_circuited_access(p_two_hand, card_index_in_hand).rank == last_card.rank
                     }
                     last_card = take_card_at_index(p_two_hand, card_index_in_hand)
+                    if p_two_hand.size() == 0:
+                        game_over = true
                     p2_plays(last_card.suit, last_card.rank)
                     p2_done = true
                     if last_card.rank == 8:
