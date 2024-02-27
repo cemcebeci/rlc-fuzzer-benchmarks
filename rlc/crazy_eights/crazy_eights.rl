@@ -6,6 +6,8 @@ ext fun p2_is_dealt(Int suit, Int rank)
 ext fun revealed(Int suit, Int rank)
 ext fun p1_plays(Int suit, Int rank)
 ext fun p2_plays(Int suit, Int rank)
+ext fun p1_skip()
+ext fun p2_skip()
 
 fun crash() {false}:
     return
@@ -16,7 +18,7 @@ ent Card:
 
 fun init_deck(Vector<Card> deck):
     let i = 1
-    while i <= 13 :
+    while i <= 8 :
         let current : Card
         current.rank = i
         current.suit = 0
@@ -35,22 +37,50 @@ fun take_card_at_index(Vector<Card> deck, Int index) -> Card:
     deck.erase(index)
     return card
 
+# hack to imitate short-circuit semantics.
+fun check_not_eight(Vector<Card> deck, Int index) -> Bool:
+    if index < 0 or index >= deck.size():
+        return false
+    if deck.get(index).rank == 8:
+        return false
+    return true
+
+fun short_circuited_access(Vector<Card> deck, Int index) ->  Card:
+    if index < 0 or index >= deck.size():
+        let val : Card
+        val.suit = -1
+        val.rank = -1
+        return val
+    return deck.get(index)
+
+act pick_suit(ctx Card last_card) -> PickSuit:
+    act pick_suit(Int picked_suit) {picked_suit >= 0, picked_suit < 4}
+    let dummy_card : Card
+    dummy_card.rank = -2
+    dummy_card.suit = picked_suit
+    last_card = dummy_card
+
 act play() -> CrazyEights:
     frm deck: Vector<Card>
     frm p_one_hand: Vector<Card>
     frm p_two_hand: Vector<Card>
+
     init_deck(deck)
 
     # deal the cards
     frm i = 0
-    while i < 5:
+    while i < 7:
         act deal(Int index) {index >= 0, index < deck.size()}
         let card = take_card_at_index(deck, index)
+        if deck.size() == 0:
+            crash()
         p_one_hand.append(card)
         p1_is_dealt(card.suit, card.rank)
         
         act deal(Int index) {index >= 0, index < deck.size()}
         let card = take_card_at_index(deck, index)
+        if deck.size() == 0:
+            crash()
         p_two_hand.append(card)
         p2_is_dealt(card.suit, card.rank)
 
@@ -58,31 +88,68 @@ act play() -> CrazyEights:
 
     # reveal the top card
     frm last_card : Card
-    act reveal_top_card(Int top_card_index) { top_card_index >= 0, top_card_index < deck.size()}
+    act reveal_top_card(Int top_card_index) { top_card_index >= 0, top_card_index < deck.size(), check_not_eight(deck, top_card_index)}
     last_card = take_card_at_index(deck, top_card_index)
     revealed(last_card.suit, last_card.rank)
 
-    i = 0
-    while i < 3:
-        act p_one_plays(Int card_index_in_hand) {
-            card_index_in_hand >= 0,
-            card_index_in_hand < p_one_hand.size(),
-            p_one_hand.get(card_index_in_hand).rank == 8 or 
-            p_one_hand.get(card_index_in_hand).suit == last_card.suit or 
-            p_one_hand.get(card_index_in_hand).rank == last_card.rank
-        }
-        last_card = take_card_at_index(p_one_hand, card_index_in_hand)
-        p1_plays(last_card.suit, last_card.rank)
+    frm current_player = 0 # TODO pick this with an action.
+    frm game_over = false
+    while !game_over:
+        frm cards_drawn_this_turn = 0
+        if current_player == 0: # We duplicate this block since pushing the two hands into a vector did not work...
+            frm p1_done = false
+            while !p1_done:
+                actions:
+                    act draw(Int index) {index >= 0, index < deck.size(), cards_drawn_this_turn < 3}
+                    let card = take_card_at_index(deck, index)
+                    if deck.size() == 0:
+                        crash()
+                    p_one_hand.append(card)
+                    cards_drawn_this_turn = cards_drawn_this_turn + 1
+                    p1_is_dealt(card.suit, card.rank)
 
-        act p_two_plays(Int card_index_in_hand) {
-            card_index_in_hand >= 0,
-            card_index_in_hand < p_two_hand.size(),
-            p_two_hand.get(card_index_in_hand).rank == 8 or 
-            p_two_hand.get(card_index_in_hand).suit == last_card.suit or 
-            p_two_hand.get(card_index_in_hand).rank == last_card.rank
-        }
-        last_card = take_card_at_index(p_two_hand, card_index_in_hand)
-        p2_plays(last_card.suit, last_card.rank)
+                    act play(Int card_index_in_hand) {
+                        card_index_in_hand >= 0,
+                        card_index_in_hand < p_one_hand.size(),
+                        short_circuited_access(p_one_hand, card_index_in_hand).rank == 8 or
+                        short_circuited_access(p_one_hand, card_index_in_hand).suit == last_card.suit or 
+                        short_circuited_access(p_one_hand, card_index_in_hand).rank == last_card.rank
+                    }
+                    last_card = take_card_at_index(p_one_hand, card_index_in_hand)
+                    p1_plays(last_card.suit, last_card.rank)
+                    p1_done = true
+                    if last_card.rank == 8:
+                        subaction*(last_card) ps_1 = pick_suit(last_card)
 
-        i = i + 1
-    crash()
+                    act skip() {cards_drawn_this_turn == 3}
+                    p1_skip()
+                    p1_done = true
+        else:
+            frm p2_done = false
+            while !p2_done:
+                actions:
+                    act draw(Int index) {index >= 0, index < deck.size(), cards_drawn_this_turn < 3}
+                    let card = take_card_at_index(deck, index)
+                    if deck.size() == 0:
+                        crash()
+                    p_two_hand.append(card)
+                    cards_drawn_this_turn = cards_drawn_this_turn + 1
+                    p2_is_dealt(card.suit, card.rank)
+
+                    act play(Int card_index_in_hand) {
+                        card_index_in_hand >= 0,
+                        card_index_in_hand < p_two_hand.size(),
+                        short_circuited_access(p_two_hand, card_index_in_hand).rank == 8 or
+                        short_circuited_access(p_two_hand, card_index_in_hand).suit == last_card.suit or 
+                        short_circuited_access(p_two_hand, card_index_in_hand).rank == last_card.rank
+                    }
+                    last_card = take_card_at_index(p_two_hand, card_index_in_hand)
+                    p2_plays(last_card.suit, last_card.rank)
+                    p2_done = true
+                    if last_card.rank == 8:
+                        subaction*(last_card) ps_2 = pick_suit(last_card)
+
+                    act skip() {cards_drawn_this_turn == 3}
+                    p2_skip()
+                    p2_done = true
+        current_player = 1 - current_player

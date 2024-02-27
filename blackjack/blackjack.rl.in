@@ -2,7 +2,9 @@ import fuzzer.cpp_functions
 import fuzzer.utils
 import collections.vector
 
-fun crash() {false}:
+fun crash():
+    let a : Vector<Int>
+    a.get(-2000) = 20
     return
 
 ent Deck:

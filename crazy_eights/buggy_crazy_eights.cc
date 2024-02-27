@@ -616,6 +616,9 @@ std::vector<Action> CrazyEightsState::PlayLegalActions() const {
 }
 
 bool CrazyEightsState::CheckAllCardsPlayed(int action) {
+  if(not (hands_[current_player_][action] > 0))
+    throw ExpectedError();
+
   SPIEL_CHECK_GT(hands_[current_player_][action], 0);
   hands_[current_player_][action]--;
   bool all_played = true;
@@ -677,6 +680,11 @@ void CrazyEightsState::ApplyPlayAction(int action) {
       ScoreUp();
     }
 
+    if(last_suit_ != GetSuit(action) 
+      && GetRank(last_card_) != GetRank(action)
+      && GetRank(action) != kEightRank
+    ) { throw ExpectedError();}
+    
     last_card_ = action;
     last_suit_ = GetSuit(action);
 

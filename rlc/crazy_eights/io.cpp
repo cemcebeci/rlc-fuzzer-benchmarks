@@ -28,3 +28,11 @@ extern "C" void rl_revealed__int64_t_int64_t_r_void(std::uint64_t *suit, std::ui
     out << "revealed (" << *suit << ", " << *rank << ").\n";
 }
 
+extern "C" void rl_p1_skip__r_void() {
+    out << "p1 skips\n";
+}
+
+extern "C" void rl_p2_skip__r_void() {
+    out << "p2 skips\n";
+}
+
