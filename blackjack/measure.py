@@ -60,9 +60,9 @@ for bug_depth in bug_depths:
     ax.plot(processed_depths, average_count_measurements['rlc_blackjack_no_fsm'], 'b-', label='rlc-no-fsm')
     ax.plot(processed_depths, average_count_measurements['rlc_blackjack_no_precons'], 'c-', label='rlc-no-precons')
     # ax.plot(processed_depths, average_count_measurements['rlc_blackjack_no_improvements'], 'y-', label='rlc-blackbox')
-    ax.plot(processed_depths, average_count_measurements['open_spiel_blackbox_blackjack'], 'r-', label='os-blackbox')
+    # ax.plot(processed_depths, average_count_measurements['open_spiel_blackbox_blackjack'], 'r-', label='os-blackbox')
     ax.plot(processed_depths, average_count_measurements['open_spiel_whitebox_blackjack'], 'm-', label='os-whitebox')
-
+    plt.yscale('log');
     plt.xlabel('Bug Depth')
     plt.ylabel('Average Number of Executions')
 

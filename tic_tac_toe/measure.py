@@ -4,8 +4,8 @@ import time
 import matplotlib.pyplot as plt
 
 REPEAT_COUNT = 4
-fuzzers = ['rlc_tic_tac_toe', 'rlc_tic_tac_toe_no_fsm','open_spiel_whitebox_tic_tac_toe', 'open_spiel_blackbox_tic_tac_toe'] #  'rlc_tic_tac_toe_no_precons', 'rlc_tic_tac_toe_no_improvements', 
-bug_depths = range(1, 11)
+fuzzers = ['rlc_tic_tac_toe', 'rlc_tic_tac_toe_no_fsm','open_spiel_whitebox_tic_tac_toe', 'open_spiel_blackbox_tic_tac_toe', 'rlc_tic_tac_toe_no_precons', 'rlc_tic_tac_toe_no_improvements' ] 
+bug_depths = range(1, 10)
 
 time_measurements = {fuzzer: {} for fuzzer in fuzzers}
 execution_count_measurements = {fuzzer: {} for fuzzer in fuzzers}
@@ -62,7 +62,7 @@ for bug_depth in bug_depths:
     ax.plot(processed_depths, average_count_measurements['rlc_tic_tac_toe_no_improvements'], 'y-', label='rlc-blackbox')
     ax.plot(processed_depths, average_count_measurements['open_spiel_blackbox_tic_tac_toe'], 'r-', label='os-blackbox')
     ax.plot(processed_depths, average_count_measurements['open_spiel_whitebox_tic_tac_toe'], 'm-', label='os-whitebox')
-
+    plt.yscale("log")
     plt.xlabel('Bug Depth')
     plt.ylabel('Average Number of Executions')
 

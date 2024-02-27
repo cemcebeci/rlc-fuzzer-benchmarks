@@ -87,6 +87,13 @@ ent Board:
 	fun next_turn():
 		self.playerTurn = !self.playerTurn
 
+fun guarded_comparison_condition(Board b, Int x, Int y) -> Bool:
+	# little hack here to mimic short-circuit semantics
+	let index = (x + (y * __BOARD_SIZE__))
+	if index >= __BOARD_SIZE_SQUARED__ or index < 0:
+		return false
+	return (b.get(x,y) == 0)
+
 act play() -> TicTacToe:
 	frm board : Board
 	frm score = 10
@@ -96,7 +103,7 @@ act play() -> TicTacToe:
 			x >= 0,
 			y < __BOARD_SIZE__,
 			y >= 0,
-			board.get(x, y) == 0
+			guarded_comparison_condition(board, x, y)
 		}
 		score = score - 1
 
