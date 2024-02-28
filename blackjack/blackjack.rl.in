@@ -2,11 +2,6 @@ import fuzzer.cpp_functions
 import fuzzer.utils
 import collections.vector
 
-fun crash():
-    let a : Vector<Int>
-    a.get(-2000) = 20
-    return
-
 ent Deck:
     Vector<Int> cards
     
@@ -42,7 +37,7 @@ fun calculate_points(Vector<Int> hand) -> Int:
         total = total + 10
 
     if total == 21 * __TARGET_SCORE_MULTIPLIER__:
-        crash()
+        fuzzer_crash()
     
     return total
 

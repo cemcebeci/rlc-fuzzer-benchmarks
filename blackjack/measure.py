@@ -3,7 +3,7 @@ from statistics import mean
 import time
 import matplotlib.pyplot as plt
 
-REPEAT_COUNT = 4
+REPEAT_COUNT = 2
 fuzzers = ['rlc_blackjack', 'rlc_blackjack_no_fsm', 'rlc_blackjack_no_precons', 'rlc_blackjack_no_improvements', 'open_spiel_whitebox_blackjack', 'open_spiel_blackbox_blackjack']
 bug_depths = range(1, 30, 5)
 
@@ -22,7 +22,7 @@ for bug_depth in bug_depths:
         print(f"{bug_depth} - {fuzzer}")
         for i in range(REPEAT_COUNT):
             start = time.time()
-            sp = run([f'build/{fuzzer}','-max_total_time=150', '-print_final_stats=1'], capture_output=True)
+            sp = run([f'build/{fuzzer}', '-artifact_prefix=fuzzer_output/', '-max_total_time=150', '-print_final_stats=1'], capture_output=True)
             end = time.time()
             time_measurements[fuzzer][bug_depth].append(end - start)
             execution_count = (int)(sp.stderr.decode().splitlines()[-5].split()[-1])
@@ -47,7 +47,7 @@ for bug_depth in bug_depths:
     plt.ylabel('Average Fuzzing Time (s)')
 
     ax.legend()
-    plt.savefig(f'total_times_{j}.png')
+    plt.savefig(f'total_times_blackjack.png')
     plt.clf()
 
     for fuzzer in fuzzers:
@@ -59,15 +59,15 @@ for bug_depth in bug_depths:
     ax.plot(processed_depths, average_count_measurements['rlc_blackjack'], 'g-', label='rlc-full')
     ax.plot(processed_depths, average_count_measurements['rlc_blackjack_no_fsm'], 'b-', label='rlc-no-fsm')
     ax.plot(processed_depths, average_count_measurements['rlc_blackjack_no_precons'], 'c-', label='rlc-no-precons')
-    # ax.plot(processed_depths, average_count_measurements['rlc_blackjack_no_improvements'], 'y-', label='rlc-blackbox')
-    # ax.plot(processed_depths, average_count_measurements['open_spiel_blackbox_blackjack'], 'r-', label='os-blackbox')
+    ax.plot(processed_depths, average_count_measurements['rlc_blackjack_no_improvements'], 'y-', label='rlc-blackbox')
+    ax.plot(processed_depths, average_count_measurements['open_spiel_blackbox_blackjack'], 'r-', label='os-blackbox')
     ax.plot(processed_depths, average_count_measurements['open_spiel_whitebox_blackjack'], 'm-', label='os-whitebox')
     plt.yscale('log');
     plt.xlabel('Bug Depth')
     plt.ylabel('Average Number of Executions')
 
     ax.legend()
-    plt.savefig(f'num_executions_{j}.png')
+    plt.savefig(f'num_executions_blackjack.png')
     plt.clf()
 
     for fuzzer in fuzzers:
