@@ -32,8 +32,8 @@ namespace buggy_tic_tac_toe {
 
 // Constants.
 inline constexpr int kNumPlayers = 2;
-inline constexpr int kNumRows = __BOARD_SIZE__;
-inline constexpr int kNumCols = __BOARD_SIZE__;
+inline constexpr int kNumRows = 3;
+inline constexpr int kNumCols = 3;
 inline constexpr int kNumCells = kNumRows * kNumCols;
 inline constexpr int kCellStates = 1 + kNumPlayers;  // empty, 'x', and 'o'.
 

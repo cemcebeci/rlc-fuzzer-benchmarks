@@ -1,29 +1,26 @@
-# This file contains an implementation of a __BOARD_SIZE__x__BOARD_SIZE__ tic tac toe. The game crashes when a player wins by
+# This file contains an implementation of a 3x3 tic tac toe. The game crashes when a player wins by
 #	filling the second diagonal. We are expecting the fuzzer to find this error.
 import serialization.to_byte_vector
 import fuzzer.cpp_functions
 import fuzzer.utils
 
-fun crash() {false}:
-	return
-
 ent Board:
-	Int[__BOARD_SIZE_SQUARED__] slots
+	Int[9] slots
 	Bool playerTurn
 
 
 	fun get(Int x, Int y) -> Int:
-		return self.slots[x + (y * __BOARD_SIZE__)]
+		return self.slots[x + (y * 3)]
 
 	fun set(Int x, Int y, Int val): 
-		self.slots[x + (y * __BOARD_SIZE__)] = val
+		self.slots[x + (y * 3)] = val
 
 	fun full() -> Bool:
 		let x = 0
 
-		while x < __BOARD_SIZE__:
+		while x < 3:
 			let y = 0
-			while y < __BOARD_SIZE__:
+			while y < 3:
 				if self.get(x, y) == 0:
 					return false
 				y = y + 1
@@ -33,7 +30,7 @@ ent Board:
 
 	fun complete_line_player_row(Int player_id, Int row) -> Bool:
 		let i = 0
-		while i < __BOARD_SIZE__:
+		while i < 3:
 			if self.get(i, row) != player_id:
 				return false
 			i = i + 1
@@ -41,7 +38,7 @@ ent Board:
 
 	fun complete_line_player_col(Int player_id, Int col) -> Bool:
 		let i = 0
-		while i < __BOARD_SIZE__:
+		while i < 3:
 			if self.get(col, i) != player_id:
 				return false
 			i = i + 1
@@ -49,7 +46,7 @@ ent Board:
 	
 	fun diagonal_player(Int player_id) -> Bool:
 		let i = 0
-		while i < __BOARD_SIZE__:
+		while i < 3:
 			if self.get(i, i) != player_id:
 				return false
 			i = i + 1
@@ -57,15 +54,15 @@ ent Board:
 
 	fun inverse_diagonal_player(Int player_id) -> Bool:
 		let i = 0
-		while i < __BOARD_SIZE__:
-			if self.get(i, (__BOARD_SIZE__ - 1) - i) != player_id:
+		while i < 3:
+			if self.get(i, (3 - 1) - i) != player_id:
 				return false
 			i = i + 1
 		return true
 
-	fun complete_line_player(Int player_id) -> Bool:
+	fun complete_line_player(Int player_id, Bool can_crash) -> Bool:
 		let x = 0
-		while x < __BOARD_SIZE__:
+		while x < 3:
 			if self.complete_line_player_col(player_id, x):
 				return true
 
@@ -77,6 +74,8 @@ ent Board:
 			return true
 
 		if self.inverse_diagonal_player(player_id):
+			if can_crash:
+				fuzzer_crash()
 			return true
 
 		return false
@@ -89,19 +88,19 @@ ent Board:
 
 fun guarded_comparison_condition(Board b, Int x, Int y) -> Bool:
 	# little hack here to mimic short-circuit semantics
-	let index = (x + (y * __BOARD_SIZE__))
-	if index >= __BOARD_SIZE_SQUARED__ or index < 0:
+	let index = (x + (y * 3))
+	if index >= 9 or index < 0:
 		return false
 	return (b.get(x,y) == 0)
 
-act play() -> TicTacToe:
+act tic_tac_toe(frm Bool can_crash) -> TicTacToe:
 	frm board : Board
 	frm score = 10
 	while !board.full():
 		act mark(Int x, Int y) {
-			x < __BOARD_SIZE__,
+			x < 3,
 			x >= 0,
-			y < __BOARD_SIZE__,
+			y < 3,
 			y >= 0,
 			guarded_comparison_condition(board, x, y)
 		}
@@ -109,8 +108,7 @@ act play() -> TicTacToe:
 
 		board.set(x, y, board.current_player())
 
-		if board.complete_line_player(board.current_player()):
-			crash()
+		if board.complete_line_player(board.current_player(), can_crash):
 			return
 
 		board.next_turn()
@@ -119,3 +117,9 @@ fun gen_printer_parser():
 	let state = play()
 	let serialized = as_byte_vector(state)
 	from_byte_vector(state, serialized)
+
+act play() -> SuccessiveGames:
+	frm i = 1
+	while i <= __NUM_GAMES__:
+		subaction* game = tic_tac_toe(i == __NUM_GAMES__)
+		i = i + 1

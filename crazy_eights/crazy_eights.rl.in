@@ -9,16 +9,13 @@ ext fun p2_plays(Int suit, Int rank)
 ext fun p1_skip()
 ext fun p2_skip()
 
-fun crash() {false}:
-    return
-
 ent Card:
     Int suit
     Int rank
 
 fun init_deck(Vector<Card> deck):
     let i = 1
-    while i <= 8 :
+    while i <= __SUIT_COUNT__:
         let current : Card
         current.rank = i
         current.suit = 0
@@ -73,14 +70,14 @@ act play() -> CrazyEights:
         act deal(Int index) {index >= 0, index < deck.size()}
         let card = take_card_at_index(deck, index)
         if deck.size() == 0:
-            crash()
+            fuzzer_crash()
         p_one_hand.append(card)
         p1_is_dealt(card.suit, card.rank)
         
         act deal(Int index) {index >= 0, index < deck.size()}
         let card = take_card_at_index(deck, index)
         if deck.size() == 0:
-            crash()
+            fuzzer_crash()
         p_two_hand.append(card)
         p2_is_dealt(card.suit, card.rank)
 
@@ -106,7 +103,7 @@ act play() -> CrazyEights:
                     act draw(Int index) {index >= 0, index < deck.size(), cards_drawn_this_turn < 3}
                     let card = take_card_at_index(deck, index)
                     if deck.size() == 0:
-                        crash()
+                        fuzzer_crash()
                     p_one_hand.append(card)
                     cards_drawn_this_turn = cards_drawn_this_turn + 1
                     p1_is_dealt(card.suit, card.rank)
@@ -136,7 +133,7 @@ act play() -> CrazyEights:
                     act draw(Int index) {index >= 0, index < deck.size(), cards_drawn_this_turn < 3}
                     let card = take_card_at_index(deck, index)
                     if deck.size() == 0:
-                        crash()
+                        fuzzer_crash()
                     p_two_hand.append(card)
                     cards_drawn_this_turn = cards_drawn_this_turn + 1
                     p2_is_dealt(card.suit, card.rank)

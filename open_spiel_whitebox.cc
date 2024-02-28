@@ -64,6 +64,10 @@ static open_spiel::Action pickAction(std::vector<open_spiel::Action> actions,
 #define QUOTE(name) #name
 #define STR(macro) QUOTE(macro)
 
+#ifndef __NUM_GAMES__
+#define __NUM_GAMES__ 1
+#endif
+
 extern "C" int LLVMFuzzerTestOneInput(const char *Data, size_t Size) {
   int byte_offset = 0, bit_offset = 0;
 
@@ -76,30 +80,33 @@ extern "C" int LLVMFuzzerTestOneInput(const char *Data, size_t Size) {
     return -1;
   }
 
-  out << "Starting new game..." << std::endl;
-  std::unique_ptr<open_spiel::State> state = game->NewInitialState();
+  for(int i = 1; i <= __NUM_GAMES__; i++) {
+    out << "Starting new game..." << std::endl;
+    std::unique_ptr<open_spiel::State> state = game->NewInitialState();
 
-  out << "Initial state:" << std::endl;
-  out << "State:" << std::endl << state->ToString() << std::endl;
+    out << "Initial state:" << std::endl;
+    out << "State:" << std::endl << state->ToString() << std::endl;
 
-  try {
-    while (!state->IsTerminal()) {
-      // Assuming no simultaneous nodes.
-      open_spiel::Action action = pickAction(state->LegalActions(), Data,
-                                              Size, byte_offset, bit_offset);
-      state->ApplyAction(action);
-      out << "State: " << std::endl << state->ToString() << std::endl;
+    try {
+      while (!state->IsTerminal()) {
+        // Assuming no simultaneous nodes.
+        open_spiel::Action action = pickAction(state->LegalActions(), Data,
+                                                Size, byte_offset, bit_offset);
+        state->ApplyAction(action);
+        out << "State: " << std::endl << state->ToString() << std::endl;
+      }
+    } catch (OutOfFuzzInputException e) {
+      return 0;
+    } catch (ExpectedError e) {
+      return 0;
+    } catch (InsertedError e) {
+      if (i < __NUM_GAMES__) {
+        // carry on with the next game
+      } else {
+        std::cout << "Found the bug.\n";
+        __builtin_trap();
+      }
     }
-  } catch (OutOfFuzzInputException e) {
-    return 0;
-  } catch (ExpectedError e) {
-    return 0;
-  }
-
-  auto returns = state->Returns();
-  for (auto p = open_spiel::Player{0}; p < game->NumPlayers(); p++) {
-    out << "Final return to player " << p << " is " << returns[p]
-              << std::endl;
   }
   return 0;
 }

@@ -208,7 +208,7 @@ int BuggyBlackjackState::GetBestPlayerTotal(int player) const {
   /*                       THIS IS THE BUG I'VE INTRODUCED                      */
   /* -------------------------------------------------------------------------- */
   if(total == kApproachScore)
-    throw std::exception();
+    throw InsertedError();
   /* -------------------------------------------------------------------------- */
   return total;
 }

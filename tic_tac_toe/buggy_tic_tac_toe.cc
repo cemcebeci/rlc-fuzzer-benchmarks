@@ -142,7 +142,10 @@ void BuggyTicTacToeState::DoApplyAction(Action move) {
     /* -------------------------------------------------------------------------- */
     /*                       THIS IS THE BUG I'VE INTRODUCED                      */
     /* -------------------------------------------------------------------------- */
-      throw std::exception();
+      if(BoardAt(0,2) == BoardAt(1,1) and
+        BoardAt(0,2) == BoardAt(2,0) and
+        BoardAt(0,2) == PlayerToState(current_player_))
+        throw InsertedError();
     /* -------------------------------------------------------------------------- */
   }
   current_player_ = 1 - current_player_;

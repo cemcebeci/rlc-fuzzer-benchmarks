@@ -3,7 +3,7 @@ from statistics import mean
 import time
 import matplotlib.pyplot as plt
 
-REPEAT_COUNT = 4
+REPEAT_COUNT = 2
 fuzzers = ['open_spiel_whitebox_crazy_eights', 'open_spiel_blackbox_crazy_eights', 'rlc_crazy_eights', 'rlc_crazy_eights_no_fsm', 'rlc_crazy_eights_no_precons', 'rlc_crazy_eights_no_improvements']
 bug_depths = range(1, 20, 2)
 
@@ -21,16 +21,12 @@ for bug_depth in bug_depths:
         execution_count_measurements[fuzzer][bug_depth] = []
         print(f"{bug_depth} - {fuzzer}")
         for i in range(REPEAT_COUNT):
-            if j > 1 and time_measurements[fuzzer][bug_depths[j - 2]][0] > 150: # shortcut
-                time_measurements[fuzzer][bug_depth].append(150)
-                execution_count_measurements[fuzzer][bug_depth].append(0)
-            else: 
-                start = time.time()
-                sp = run([f'build/{fuzzer}','-artifact_prefix=fuzzer_output/','-max_total_time=150', '-print_final_stats=1'], capture_output=True)
-                end = time.time()
-                time_measurements[fuzzer][bug_depth].append(end - start)
-                execution_count = (int)(sp.stderr.decode().splitlines()[-5].split()[-1])
-                execution_count_measurements[fuzzer][bug_depth].append(execution_count)
+            start = time.time()
+            sp = run([f'build/{fuzzer}','-artifact_prefix=fuzzer_output/','-max_total_time=150', '-print_final_stats=1'], capture_output=True)
+            end = time.time()
+            time_measurements[fuzzer][bug_depth].append(end - start)
+            execution_count = (int)(sp.stderr.decode().splitlines()[-5].split()[-1])
+            execution_count_measurements[fuzzer][bug_depth].append(execution_count)
 
     processed_depths = bug_depths[:j]
     print(processed_depths)
@@ -51,7 +47,7 @@ for bug_depth in bug_depths:
     plt.ylabel('Average Fuzzing Time (s)')
 
     ax.legend()
-    plt.savefig(f'total_times_{j}.png')
+    plt.savefig(f'total_times_crazy_eights.png')
     plt.clf()
 
     for fuzzer in fuzzers:
@@ -71,7 +67,7 @@ for bug_depth in bug_depths:
     plt.ylabel('Average Number of Executions')
 
     ax.legend()
-    plt.savefig(f'num_executions_{j}.png')
+    plt.savefig(f'num_executions_crazy_eights.png')
     plt.clf()
 
     for fuzzer in fuzzers:
