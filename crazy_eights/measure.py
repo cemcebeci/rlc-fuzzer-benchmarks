@@ -3,13 +3,12 @@ from statistics import mean
 import time
 import matplotlib.pyplot as plt
 
-REPEAT_COUNT = 2
+REPEAT_COUNT = 4
 fuzzers = ['open_spiel_whitebox_crazy_eights', 'open_spiel_blackbox_crazy_eights', 'rlc_crazy_eights', 'rlc_crazy_eights_no_fsm', 'rlc_crazy_eights_no_precons', 'rlc_crazy_eights_no_improvements']
-bug_depths = range(1, 20, 2)
+bug_depths = range(1, 30, 2)
 
 time_measurements = {fuzzer: {} for fuzzer in fuzzers}
 execution_count_measurements = {fuzzer: {} for fuzzer in fuzzers}
-
 
 j = 0
 for bug_depth in bug_depths:

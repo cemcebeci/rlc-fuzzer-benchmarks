@@ -3,13 +3,12 @@ from statistics import mean
 import time
 import matplotlib.pyplot as plt
 
-REPEAT_COUNT = 6
+REPEAT_COUNT = 10
 fuzzers = ['rlc_tic_tac_toe', 'rlc_tic_tac_toe_no_fsm', 'rlc_tic_tac_toe_no_precons', 'rlc_tic_tac_toe_no_improvements', 'open_spiel_whitebox_tic_tac_toe', 'open_spiel_blackbox_tic_tac_toe']
-bug_depths = range(1, 100, 5)
+bug_depths = range(1, 51, 5)
 
 time_measurements = {fuzzer: {} for fuzzer in fuzzers}
 execution_count_measurements = {fuzzer: {} for fuzzer in fuzzers}
-went_over_time_cap = {fuzzer: False for fuzzer in fuzzers }
 
 
 j = 0
@@ -22,21 +21,12 @@ for bug_depth in bug_depths:
         execution_count_measurements[fuzzer][bug_depth] = []
         print(f"{bug_depth} - {fuzzer}")
         for i in range(REPEAT_COUNT):
-            if went_over_time_cap[fuzzer]:
-                time_measurements[fuzzer][bug_depth].append(150)
-                execution_count_measurements[fuzzer][bug_depth].append(
-                    # sshhhh
-                    execution_count_measurements[fuzzer][bug_depth][0]if i > 0 else execution_count_measurements[fuzzer][bug_depths[j - 2]][0]
-                    )
-            else: 
-                start = time.time()
-                sp = run([f'build/{fuzzer}', '-artifact_prefix=fuzzer_output/', '-max_total_time=150', '-print_final_stats=1'], capture_output=True)
-                end = time.time()
-                time_measurements[fuzzer][bug_depth].append(end - start)
-                if end - start > 150:
-                    went_over_time_cap[fuzzer] = True
-                execution_count = (int)(sp.stderr.decode().splitlines()[-5].split()[-1])
-                execution_count_measurements[fuzzer][bug_depth].append(execution_count)
+            start = time.time()
+            sp = run([f'build/{fuzzer}', '-artifact_prefix=fuzzer_output/', '-max_total_time=150', '-print_final_stats=1'], capture_output=True)
+            end = time.time()
+            time_measurements[fuzzer][bug_depth].append(end - start)
+            execution_count = (int)(sp.stderr.decode().splitlines()[-5].split()[-1])
+            execution_count_measurements[fuzzer][bug_depth].append(execution_count)
 
     processed_depths = bug_depths[:j]
     print(processed_depths)
